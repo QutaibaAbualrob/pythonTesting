@@ -2,8 +2,9 @@
 
 
 import pytest
-
+import models.functions as func
 
 
 def test_add():
-    pass 
+    result = func.add(4, 5)
+    assert result == 10

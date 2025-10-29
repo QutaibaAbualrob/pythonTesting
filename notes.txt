@@ -1,0 +1,12 @@
+1- Import problem accross dir:
+
+        Python only searches for modules in directories listed in sys.path,
+        which usually includes the current script’s folder but not its parent directories.
+
+
+        When running pytest, the tests folder becomes the working directory, so Python can’t see modules in sibling folders like models.
+
+
+        Adding __init__.py or modifying sys.path tells Python to treat the project as a package, allowing cross-folder imports.
+
+2-

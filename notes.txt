@@ -26,3 +26,7 @@
         ex:
                 ignore/
                 models/__*
+
+4- Download required packages
+
+        pip install django

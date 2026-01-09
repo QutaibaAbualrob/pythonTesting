@@ -48,3 +48,32 @@
         "testpaths = check_tests": Tells pytest where to look for tests.
 
 
+7- Detailed Backend Change Log (API & Configuration):
+
+    A. Configuration (backend/true_caller_api/true_caller_api/settings.py):
+       - Added `testserver` and `127.0.0.1` to `ALLOWED_HOSTS` for verification.
+       - Configured `REST_FRAMEWORK` throttling:
+         - `DEFAULT_THROTTLE_CLASSES`: Added `UserRateThrottle`.
+         - `DEFAULT_THROTTLE_RATES`: Set `user` scope to `5/hour`.
+
+    B. Database Models (backend/true_caller_api/true_caller_app/models.py):
+       - Modified `Contact` model:
+         - Added `carrier` field (CharField, max_length=50, nullable).
+
+    C. Serializers (backend/true_caller_api/true_caller_app/serializers.py):
+       - Modified `ContactSerializer`:
+         - Included `'carrier'` in the `fields` list to expose it in API responses.
+
+    D. Views (backend/true_caller_api/true_caller_app/views.py):
+       - Validated `SearchView`.
+       - Documented usage of default `UserRateThrottle` (implicit via settings).
+
+    E. Admin Panel (backend/true_caller_api/true_caller_app/admin.py):
+       - Registered `Contact`, `SpamReport`, and `UserProfile` models.
+       - Implemented `ModelAdmin` classes for enhanced display (list_display, search_fields, list_filter).
+
+    F. Migrations (backend/true_caller_api/true_caller_app/migrations/):
+       - Created and applied `0002_contact_spamreport_userprofile_delete_phone.py` to persist schema changes.
+
+    
+

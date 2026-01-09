@@ -52,6 +52,7 @@ class LoginView(ObtainAuthToken):
 # 3. Phone Number Search View
 class SearchView(APIView):
     permission_classes = [permissions.IsAuthenticated] # Only logged-in users can search
+    # Uses default UserRateThrottle (5/hour) from settings.py
 
     def get(self, request, number):
         # Format: /search/<number>

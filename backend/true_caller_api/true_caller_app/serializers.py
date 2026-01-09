@@ -34,7 +34,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ['phone_number', 'name', 'is_spam', 'spam_score']
+        fields = ['phone_number', 'name', 'is_spam', 'spam_score', 'carrier']
 
 
 # 3. Spam Report Serializer

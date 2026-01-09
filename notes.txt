@@ -27,6 +27,24 @@
                 ignore/
                 models/__*
 
-4- Download required packages
 
-        pip install django
+
+4- Project Restructuring (Import Fixes):
+
+        Moved "tests" -> "backend/true_caller_api/check_tests" so they are inside the Django project.
+        Moved "models/account.py" out of root to avoid conflicts.
+        Fixed import errors by organizing files where Python/Django expects them.
+
+5- Environment Setup:
+
+        Created "requirements.txt" with:
+        django, djangorestframework, pytest, pytest-django.
+        Run "pip install -r requirements.txt" to install them.
+
+6- Pytest Configuration (pytest.ini):
+
+        Created "backend/true_caller_api/pytest.ini".
+        "DJANGO_SETTINGS_MODULE = true_caller_api.settings": Tells pytest which settings to use.
+        "testpaths = check_tests": Tells pytest where to look for tests.
+
+

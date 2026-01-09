@@ -1,3 +1,8 @@
 true_caller_api/__p*
+
+
+
 true_caller_app/__p*
 true_caller_app/migrations/__pycache__
+true_caller_app/management/*__pycache__
+true_caller_app/management/commands/*__pycache__

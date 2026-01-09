@@ -75,5 +75,20 @@
     F. Migrations (backend/true_caller_api/true_caller_app/migrations/):
        - Created and applied `0002_contact_spamreport_userprofile_delete_phone.py` to persist schema changes.
 
-    
+8- Test Data Generation & Loading:
 
+    A. Data Source (edge_case_data.csv):
+       - Created a CSV file with 10+ records covering edge cases:
+         - Max length strings.
+         - Special characters and SQL injection attempts.
+         - Unicode characters.
+         - Empty fields and zero values.
+
+    B. Management Command (backend/true_caller_api/true_caller_app/management/commands/load_test_data.py):
+       - Implemented a custom Django management command `load_test_data`.
+       - Reads the CSV and populates the `Contact` model.
+       - Handles updates (idempotent based on phone number) and reports errors.
+
+    C. Usage:
+       Run the following command from the project root:
+       `python backend/true_caller_api/manage.py load_test_data edge_case_data.csv`

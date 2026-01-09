@@ -22,6 +22,8 @@ class Contact(models.Model):
     is_spam = models.BooleanField(default=False)
     spam_score = models.IntegerField(default=0) # e.g. count of reports
     
+    carrier = models.CharField(max_length=50, blank=True, null=True)
+
     def __str__(self):
         return f"{self.phone_number} - {self.name}"
 

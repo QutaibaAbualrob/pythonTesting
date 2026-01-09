@@ -1,0 +1,492 @@
+﻿Software Testing For Simple
+Truecaller API
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Qutaiba Abualrob - 202210472
+
+
+Mohamed Sbehat - 202211491
+
+
+Haitham Khalil - 202113027
+
+
+Mohammed Labadi – 202210384
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+________________
+
+
+Contents
+
+
+1. Introduction
+2. Project Scope and overview 
+3. System Analysis
+4. System Design 
+5. Objectives of Testing
+6. Testing Strategy
+7. Types of Testing to be Performed
+8. Test Environment
+9. Tools & Technologies
+10. Test Schedule
+11. Roles & Responsibilities 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Overview
+
+
+
+
+We have chosen this application because its logic offers a "rich testing ground" for applying multiple core software testing techniques.
+
+
+The Simple Truecaller API simulates a real-world phone number identification service. It includes:
+* User authentication
+
+* Phone number lookup
+
+* Spam reporting
+
+________________
+
+
+
+
+1. Phone Number Search
+A search bar on the homepage allows any user to enter a phone number. The backend queries the database and returns the Owner Name, Carrier,
+and Spam Status.
+
+
+2. User Spam Reporting
+Authenticated users can submit a report for a specific number, categorizing it (e.g., "Sales," "Scam") and adding a comment.
+
+
+
+
+
+
+3. User Authentication & Rate Limiting
+To prevent abuse (like scraping the whole database), api limits searches ("5 searches per hour").
+
+
+
+
+
+
+
+
+________________
+
+
+System Analysis
+
+
+The Simple Truecaller API is a backend RESTful system that provides phone number identification and spam-reporting services. Clients interact with the system through HTTP requests and receive JSON responses. The system includes core components such as authentication, business logic, and database management.
+
+
+   * Backend REST API providing caller identification services
+
+   * Handles authentication, number lookup, and spam reporting
+
+   * Uses token-based security for protected endpoints
+
+   * Exchanges data using JSON over HTTP
+
+   * Integrates API, service logic, and database layers
+
+   * Designed for unit, integration, and system-level testing
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+Requirements Analysis
+We have analyzed the Truecaller API Service and defined the following requirements. These define the "Contract" that the backend must fulfill, which will be validated via API testing.
+
+
+Functional Requirements:
+
+
+FR‑01  User Registration
+        The system must allow a new user to register using a name and phone number.
+FR‑02  User Login
+        The system must allow users to log in using their registered phone number and receive an authentication token.
+FR‑03  Phone Number Search
+        Users must be able to search for any phone number through the API.
+FR‑04  Return Caller Information
+        When a number exists in the database, the system must return the owner's name,                                carrier information, and spam status.
+FR‑05 Spam Reporting
+        Authenticated users must be able to submit spam reports for any phone number, including category and comment.
+FR‑06  Authorization Control
+        The system must block all protected endpoints when used without a valid authentication token.
+FR‑07  Rate Limiting
+        The system must enforce search limits (e.g., max 5 searches per hour per user) to prevent abuse.
+FR‑08  Duplicate Registration Prevention
+        The system must not allow registering a phone number that already exists (return 409 Conflict).
+FR‑09  Input Validation
+        API must validate all inputs (empty or invalid formats return 400 Bad Request).
+________________
+Non‑Functional Requirements:
+1. Performance Requirements
+NFR‑P1: Average API response time must be ≤ 2 seconds under normal load.
+NFR‑P2: 95% of all requests must respond within ≤ 1.5 seconds.
+NFR‑P3: The system must handle 1000 requests per minute without failure.
+NFR‑P4: Maximum CPU usage during peak load must remain below 80%.
+NFR‑P5: Database query execution must not exceed 500 ms.
+
+
+2. Reliability Requirements
+NFR‑R1: System uptime must be ≥ 99% monthly.
+NFR‑R2: System must handle at least 10,000 total records without data corruption.
+
+
+3. Availability Requirements
+NFR‑A1: API must be available 24/7 with no more than 7 hours of downtime per year.
+NFR‑A2: Backup frequency must occur every 12 hours.
+
+
+4. Scalability Requirements
+NFR‑S1: System must support up to 10× traffic increase without architecture changes.
+NFR‑S2: Database should support up to 100,000 records with no performance drop > 20%.
+
+
+5. Security Requirements
+NFR‑SEC1: Failed login attempts must be limited to 5 attempts per user per hour.
+NFR‑SEC2: Password hashing must use a minimum SHA‑256 or stronger algorithm.
+NFR‑SEC3: Token expiry time must be ≤ 24 hours.
+NFR‑SEC4: System must block all inputs longer than 50 characters for phone fields.
+NFR‑SEC5: All endpoints must enforce HTTPS with TLS 1.2 or higher.
+
+
+6. Maintainability Requirements
+NFR‑M1: New developers should understand system modules within ≤ 2 days of onboarding.
+NFR‑M2: Fixing a critical bug should take ≤ 6 hours after detection.
+NFR‑M3: Code duplication must be kept below 10%.
+NFR‑M4: Automated tests must cover ≥ 70% of backend code.
+
+
+
+
+
+
+________________
+
+
+TEST PLAN  
+
+
+
+This document outlines the test plan for the Truecaller API Service, a simulated phone number identification . 
+
+
+The purpose of this test plan is to ensure that all functional and non-functional requirements are validated through systematic testing, thereby guaranteeing the reliability, security, and performance of the application before deployment
+
+
+
+
+ Test Strategy :
+Methodology:
+                1) Blackbox testing for API endpoints, Whitebox for unit tests
+                2)Manual and automated functional tests
+3)Integration testing between API and service layer and database
+
+
+
+Testing Levels: 
+        Unit Testing 
+Integration Testing 
+System Testing 
+Acceptance Testing 
+
+
+Test Environment : 
+        Backend environment running the Simple Truecaller   API
+Tools: Pytest
+Test data: mock phone numbers and user accounts.
+
+
+Test Schedule
+Week 1: Requirements analysis
+Week 2: Test plan creation and  Writing test cases
+Week 3: Unit & integration testing and  Manual system testing
+Week 4: Automation
+Week 5: Bug fixing & final report
+Test Cases 
+
+
+1. User Registration 
+Test Case ID
+	Requirement ID
+	Title
+	Preconditions
+	Steps
+	Expected Result
+	Priority
+	TC-REG-01
+	FR-01
+	Register with valid data
+	None 
+	1. Send POST / register
+2. Provide valid name & phone 
+	201 Created, user saved 
+	High
+	TC-REG-02
+	FR-01,
+FR-08
+	Register with existing phone
+	Phone already registered 
+	1. POST / register with same phone
+	409 Conflict 
+	High
+	TC-REG-03
+	FR-01,
+FR-09
+	Register with empty phone
+	None
+	1. POST / register with empty phone 
+	400 Bad Request 
+	Medium
+	
+
+
+
+
+
+2. User Login
+Test Case ID
+	Requirement ID
+	Title
+	Preconditions
+	Steps
+	Expected Result
+	Priority
+	TC-LOGIN-01
+	FR-02
+	Login with valid phone
+	Valid token
+	      1. Call protected endpoint
+	200 OK
+	High
+	TC-LOGIN-02
+	FR-02
+	Login with unregistered phone
+	None
+	      1. Call protected endpoint
+	401 Unauthorized
+	High
+	TC-LOGIN-03
+	FR-02,
+FR-09
+	Login with empty request
+	None
+	      1. Inject SQL in input
+	400 Bad Request
+	High
+	
+
+3. Phone Number Search
+
+
+Test Case ID
+	Requirement ID
+	Title
+	Preconditions
+	Steps
+	Expected Result
+	Priority
+	TC-SRCH-01
+	FR-03,
+FR-04
+	Search existing number 
+	Valid token
+	1. GET / search/ {number}
+	200 OK + name
+	High
+	TC-SRCH-02
+	FR-03,
+FR-04
+	Search non-
+ existing number 
+	Valid token
+	1. GET / search/ {number} 
+	404 Not Found
+	Medium
+	TC-SRCH-03
+	FR-06,
+FR-07
+	Search without token
+	None
+	1. GET / search/ {number}
+	401 Unauthorized
+	High
+	
+
+4. Spam Reporting
+
+
+
+
+Test Case ID
+	Requirement ID
+	Title
+	Preconditions
+	Steps
+	Expected Result
+	Priority
+	TCSPAM-01 
+	FR-05
+	Report number as spam
+	Logged-in user
+	1. POST / spam
+2. Provide phone
+	200 OK, marked spam
+	High
+	TCSPAM-02 
+	FR-06
+	Report same number twice
+	Already spammed
+	1. POST / spam again
+	409 Conflict
+	Medium
+	TCSPAM-03 
+	FR-05,
+FR-09
+	Report without auth
+	None
+	1. POST / spam 
+	401 Unauthorized
+	High
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Requirements traceability matrix
+
+
+
+
+Requirement ID
+	Requirement
+	Test case IDs that cover it
+	FR01
+	User registration using name + phone number. 
+	TC-REG-01, TC-REG-02, TC-REG-03. 
+	FR02
+	User login using registered phone number and receive token. ​
+	TC-LOGIN-01, TC-LOGIN-02, TC-LOGIN-03. 
+	FR03
+	Search for a phone number via the API. ​
+	TC-SRCH-01, TC-SRCH-02. 
+	FR04
+	If number exists, return owner name + carrier + spam status. ​
+	TC-SRCH-01, TC-SRCH-02. 
+	FR05
+	Authenticated user can submit a spam report (category + comment). ​
+	TCSPAM-01, TCSPAM-03. ​
+	FR06
+	Protected endpoints blocked without valid token. ​
+	TC-SRCH-03, TCSPAM-03. ​
+	FR07
+	Enforce rate limiting (example: 5 searches/hour/user). ​
+	Currently no clear “exceed limit” test case appears in the listed set (TC-SRCH-03 is about missing token, not exceeding quota). ​
+	FR08
+	Prevent duplicate registration (existing phone → conflict). ​
+	TC-REG-02. ​
+	FR09
+	Input validation (empty/invalid formats → bad request). ​
+	TC-REG-03, TC-LOGIN-03, TCSPAM-03. ​

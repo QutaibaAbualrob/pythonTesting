@@ -17,7 +17,8 @@ from .serializers import (
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
-    permission_classes = [permissions.AllowAny] # Allow anyone to register
+    permission_classes = [permissions.AllowAny]  # Allow anyone to register
+    throttle_classes = []  # No rate limiting for registration
 
     def create(self, request, *args, **kwargs):
         # We override create to return the Token immediately upon registration
@@ -28,20 +29,48 @@ class RegisterView(generics.CreateAPIView):
         # Create a token for the new user
         token, created = Token.objects.get_or_create(user=user)
         
+        # Get the user's phone from UserProfile
+        user_profile = UserProfile.objects.get(user=user)
+        
         return Response({
-            "user": serializer.data,
+            "user": {
+                "name": request.data.get('name'),
+                "phone": user_profile.phone_number,
+                "username": user.username
+            },
             "token": token.key
         }, status=status.HTTP_201_CREATED)
 
 
 # 2. Login View
-# We can use DRF's built-in ObtainAuthToken, but extending it allows ensuring it's cleaner
-class LoginView(ObtainAuthToken):
+# Custom login that accepts phone number
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = []  # No rate limiting for login
+    
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        phone = request.data.get('phone')
+        
+        # Validate input
+        if not phone:
+            return Response(
+                {"error": "Phone number is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Find user by phone number
+        try:
+            user_profile = UserProfile.objects.get(phone_number=phone)
+            user = user_profile.user
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get or create token for the user
         token, created = Token.objects.get_or_create(user=user)
+        
         return Response({
             'token': token.key,
             'user_id': user.pk,
@@ -83,12 +112,20 @@ class SpamReportView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # Custom logic to handle "Contact doesn't exist yet"
-        # Ideally, the frontend sends a 'contact' ID, but usually they send a 'phone_number'.
+        # Ideally, the frontend sends a 'contact' ID, but usually they send a 'phone_number' or 'phone'.
         # Let's handle the case where the user sends a phone number instead of an ID.
         
-        # If the request contains 'phone_number' instead of 'contact' ID:
-        if 'phone_number' in request.data:
-            phone = request.data['phone_number']
+        # Accept both 'phone' and 'phone_number' field names
+        phone = request.data.get('phone') or request.data.get('phone_number')
+        
+        if phone is not None:
+            # Validate phone is not empty
+            if not phone:
+                return Response(
+                    {"error": "Phone number cannot be empty."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             # Get or Create the contact entry first
             contact, created = Contact.objects.get_or_create(phone_number=phone)
             

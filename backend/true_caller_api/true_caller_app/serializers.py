@@ -61,7 +61,10 @@ class SpamReportSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         # Create a mutable copy of the data to avoid modifying the original
-        data = data.copy()
+        if hasattr(data, 'copy'):
+            data = data.copy()
+        else:
+            data = dict(data)
         
         # Normalize category to uppercase if present
         if 'category' in data and isinstance(data['category'], str):

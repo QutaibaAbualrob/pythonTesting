@@ -14,6 +14,8 @@
         py -3.13 -m venv testingenv313
 
         testingenv313/Scripts/activate
+        
+        python backend/true_caller_api/manage.py runserver
 
         python --version
 

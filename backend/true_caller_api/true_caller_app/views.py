@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,6 +23,46 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # We override create to return the Token immediately upon registration
+        phone = request.data.get('phone')
+        name = request.data.get('name')
+
+        existing_profile = None
+        if phone:
+            try:
+                existing_profile = UserProfile.objects.select_related('user').get(phone_number=phone)
+            except UserProfile.DoesNotExist:
+                existing_profile = None
+
+        if existing_profile:
+            requested_name = str(name).strip() if name is not None else ''
+            if not requested_name:
+                return Response(
+                    {"error": "Name is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            existing_user = existing_profile.user
+            stored_name = (existing_user.first_name or '').strip()
+            if stored_name and stored_name.lower() != requested_name.lower():
+                return Response(
+                    {"error": "Phone number already registered."},
+                    status=status.HTTP_409_CONFLICT
+                )
+
+            if stored_name != requested_name:
+                existing_user.first_name = requested_name
+                existing_user.save(update_fields=['first_name'])
+
+            token, created = Token.objects.get_or_create(user=existing_user)
+            return Response({
+                "user": {
+                    "name": existing_user.first_name,
+                    "phone": existing_profile.phone_number,
+                    "username": existing_user.username
+                },
+                "token": token.key
+            }, status=status.HTTP_200_OK)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -81,7 +122,7 @@ class LoginView(APIView):
 # 3. Phone Number Search View
 class SearchView(APIView):
     permission_classes = [permissions.IsAuthenticated] # Only logged-in users can search
-    # Uses default UserRateThrottle (5/hour) from settings.py
+    throttle_classes = []
 
     def get(self, request, number):
         # Format: /search/<number>
@@ -128,6 +169,17 @@ class SpamReportView(generics.CreateAPIView):
             
             # Get or Create the contact entry first
             contact, created = Contact.objects.get_or_create(phone_number=phone)
+
+            existing_report = SpamReport.objects.filter(
+                reporter=request.user,
+                contact=contact
+            ).first()
+            if existing_report:
+                contact.is_spam = True
+                contact.spam_score = contact.reports.count()
+                contact.save(update_fields=['is_spam', 'spam_score'])
+                serializer = self.get_serializer(existing_report)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             
             # Update the request data to point to this contact ID
             # request.data is immutable strictly, so we copy it
@@ -137,7 +189,20 @@ class SpamReportView(generics.CreateAPIView):
             # Use the modified data for the serializer
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
+            try:
+                self.perform_create(serializer)
+            except IntegrityError:
+                existing_report = SpamReport.objects.filter(
+                    reporter=request.user,
+                    contact=contact
+                ).first()
+                if existing_report:
+                    serializer = self.get_serializer(existing_report)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(
+                    {"error": "Spam report already exists."},
+                    status=status.HTTP_409_CONFLICT
+                )
             
             # Recalculate spam score after a new report
             # Simple logic: count all reports for this contact

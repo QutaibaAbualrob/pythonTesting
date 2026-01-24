@@ -34,7 +34,8 @@ class UserRegistrationSerializer(serializers.Serializer):
         # Create the standard Django User with generated password
         user = User.objects.create_user(
             username=username,
-            password=f"auto_{phone}"  # Simple auto-generated password
+            password=f"auto_{phone}",  # Simple auto-generated password
+            first_name=name,
         )
 
         # Create the UserProfile linking the User to the phone number
